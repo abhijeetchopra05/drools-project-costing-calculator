@@ -1,0 +1,25 @@
+import com.poc.drools.projectcostingcalculator.model.Project
+
+global com.poc.drools.projectcostingcalculator.model.Costing costing;
+
+dialect "java"
+
+rule "Calculate Project Cost Total Hours less than or equal estimated hours"
+    when
+        pc: Project((amHours + dmHours + tlHours + developersHours) <= estimatedHours, cost: cost)
+    then
+        cost = ((pc.getAmHours() * pc.getAmUnits()) + (pc.getDmHours()* pc.getDmUnits())
+        + (pc.getTlHours() * pc.getTlUnits()) + (pc.getDevelopersHours() * pc.getDevelopersHours()));
+        costing.setHoursOverhead(false);
+        costing.setProjectCost(cost);
+end
+
+rule "Calculate Project Cost Total Hours more than estimated hours"
+    when
+        pc: Project((amHours + dmHours + tlHours + developersHours) > estimatedHours, cost:cost)
+    then
+        cost = ((pc.getAmHours() * pc.getAmUnits()) + (pc.getDmHours() * pc.getDmUnits())
+        + (pc.getTlHours() * pc.getTlUnits()) + (pc.getDevelopersHours() * pc.getDevelopersHours()));
+        costing.setHoursOverhead(true);
+        costing.setProjectCost(cost / 2); // if actual hours are more than the estimated hours then cost for the project is half the actual cost
+end
